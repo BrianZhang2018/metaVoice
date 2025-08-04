@@ -62,7 +62,7 @@ python3 auto_input_voice_gui.py
 ## 🏗️ Project Structure
 
 ```
-desktopAuto/
+metaVoice/
 ├── Core Application:
 │   ├── auto_input_voice_gui.py      # Main GUI application
 │   ├── whisper_wrapper.py           # Speech recognition wrapper
@@ -72,21 +72,49 @@ desktopAuto/
 │   ├── metaVoice.spec              # PyInstaller configuration
 │   ├── runtime_hook.py             # Path resolution for bundled app
 │   └── install_metaVoice.sh        # Installation script
-├── Documentation:
-│   ├── INSTALLATION_GUIDE.md       # User installation guide
-│   ├── GUI_GUIDE.md               # Interface documentation
-│   ├── HOW_TO_RUN.md              # Development setup
-│   └── HOTKEY_GUIDE.md            # Hotkey configuration
-├── Dependencies:
+├── Setup & Configuration:
+│   ├── setup.sh                    # Automated setup script
 │   ├── requirements.txt            # Python packages
-│   └── whisper.cpp/               # Speech recognition engine
+│   └── setup_permissions.py        # Permission setup utility
 ├── Development:
-│   ├── examples/                  # Usage examples
-│   ├── tests/                     # Test files
-│   └── docs/                      # Detailed documentation
-└── Setup:
-    └── setup_permissions.py       # Permission setup utility
+│   ├── examples/                   # Usage examples
+│   └── tests/                      # Test files
+└── Documentation:
+    └── docs/                       # Detailed documentation
 ```
+
+## 🤔 Why whisper.cpp is Not Included
+
+**📦 Size & Performance:**
+- **whisper.cpp is HUGE**: ~294MB (mostly models)
+- **GitHub limits**: Repositories should stay under 1GB
+- **Fast cloning**: Small repo downloads quickly
+- **Bandwidth efficient**: Users only download what they need
+
+**🔄 Maintenance Benefits:**
+- **Always latest version**: Setup script downloads fresh copy
+- **No version conflicts**: No need to sync with upstream
+- **Automatic updates**: Gets latest whisper.cpp automatically
+- **Standard practice**: Most projects exclude large dependencies
+
+**✅ How It Works:**
+The setup script automatically handles whisper.cpp:
+```bash
+# In setup.sh - automatically downloads and builds
+if [ ! -d "whisper.cpp" ]; then
+    echo "🎙️ Installing Whisper.cpp..."
+    git clone https://github.com/ggerganov/whisper.cpp.git
+    cd whisper.cpp
+    make
+    cd ..
+fi
+```
+
+**Users get whisper.cpp automatically:**
+1. **Clone** repo (fast, small)
+2. **Run** `./setup.sh` 
+3. **Whisper.cpp** downloads and builds
+4. **Everything works** seamlessly
 
 ## 🔧 Development
 
@@ -140,6 +168,11 @@ command_patterns = {
 - Check target application selection
 - Try clipboard input method
 
+### Setup Issues
+- Run `./setup.sh` to install all dependencies
+- Check that Homebrew is installed
+- Verify Python 3.8+ is installed
+
 ## 📊 Performance Tips
 
 - **Real-time Commands**: Use 3-5 second recordings
@@ -163,13 +196,6 @@ The system recognizes structured commands:
 - `"open application [app-name]"`
 - `"search for [query]"`
 
-## 📞 Getting Help
-
-- **Installation**: See `INSTALLATION_GUIDE.md`
-- **Usage**: See `GUI_GUIDE.md`
-- **Development**: See `HOW_TO_RUN.md`
-- **Issues**: Check troubleshooting section above
-
 ## 🎉 Success!
 
 When everything is working:
@@ -178,6 +204,13 @@ When everything is working:
 - ✅ Microphone button responds
 - ✅ Voice recording and transcription works
 - ✅ Text can be sent to target applications
+
+## 📞 Getting Help
+
+- **Installation**: Run `./setup.sh` for automated setup
+- **Usage**: See GUI features section above
+- **Development**: See development section
+- **Issues**: Check troubleshooting section
 
 **Enjoy using metaVoice for faster, voice-powered productivity!** 🚀
 
