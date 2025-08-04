@@ -1,0 +1,23 @@
+# Core dependencies for desktop automation
+pyaudio>=0.2.11
+numpy>=1.21.0
+requests>=2.25.0
+
+# For audio processing
+wave>=0.0.2
+
+# For command parsing and NLP (optional)
+nltk>=3.6.0
+spacy>=3.0.0
+
+# For GUI automation
+pyautogui>=0.9.53
+keyboard>=0.13.5
+
+# For local AI models (we'll add these later)
+# ollama>=0.1.0
+# langchain>=0.1.0
+
+# For database storage (we'll add these later)
+# sqlite3 (built-in)
+# chromadb>=0.4.0 
