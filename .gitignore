@@ -1,5 +1,4 @@
-# Whisper.cpp dependency (large, should be installed separately)
-whisper.cpp/
+
 
 # Python cache files
 __pycache__/
@@ -49,6 +48,7 @@ Thumbs.db
 
 # History files
 .history/
+.history
 
 # Backup files
 *_backup.py
