@@ -39,11 +39,8 @@ open /Applications/metaVoice.app
 git clone https://github.com/BrianZhang2018/metaVoice.git
 cd metaVoice
 
-# Run the setup script (recommended)
+# Run the setup script
 ./setup.sh
-
-# Or install manually
-pip3 install -r requirements.txt
 
 # Run the GUI
 python3 auto_input_voice_gui.py
@@ -101,9 +98,6 @@ fi
 
 ### Running from Source
 ```bash
-# Install dependencies
-pip3 install -r requirements.txt
-
 # Run the GUI
 python3 auto_input_voice_gui.py
 
@@ -113,9 +107,6 @@ python3 tests/test_whisper.py
 
 ### Building the App Bundle
 ```bash
-# First, ensure dependencies are installed
-./setup.sh
-
 # Build macOS app bundle
 pyinstaller metaVoice.spec
 
