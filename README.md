@@ -14,12 +14,23 @@ A modern desktop automation system that uses voice commands to control your comp
 
 ## 🚀 Quick Installation
 
-### Option 1: macOS App Bundle (Recommended)
+### Option 1: macOS App installation (for normal user)
 ```bash
-# Download and install
-./install_metaVoice.sh
+# 1. Clone the repository
+git clone https://github.com/BrianZhang2018/metaVoice.git
+cd metaVoice
 
-# Or manually drag metaVoice.app to Applications folder
+# 2. Install dependencies and setup
+./setup.sh
+
+# 3. Build the app bundle
+pyinstaller metaVoice.spec
+
+# 4. Install to Applications
+sh ./install_metaVoice.sh
+
+# 5. Test the installation
+open /Applications/metaVoice.app
 ```
 
 ### Option 2: Development Setup
@@ -46,18 +57,6 @@ python3 auto_input_voice_gui.py
 3. **Optional**: Grant accessibility permissions for automation
 4. **Start recording** with the microphone button
 
-### Voice Commands to Try
-- `"build app type react name my-app"`
-- `"record meeting duration 30 minutes"`
-- `"analyze meeting file zoom-recording.mp4"`
-- `"create component type button props onClick text"`
-
-### GUI Features
-- **🎤 Voice Recording**: Click to start/stop recording
-- **📝 Real-time Transcription**: See your speech converted to text
-- **🎯 Target App Selection**: Choose where to send text
-- **📊 Statistics**: Track your usage and efficiency
-- **⚙️ Settings**: Configure input methods and automation
 
 ## 🏗️ Project Structure
 
@@ -83,19 +82,7 @@ metaVoice/
     └── docs/                       # Detailed documentation
 ```
 
-## 🤔 Why whisper.cpp is Not Included
-
-**📦 Size & Performance:**
-- **whisper.cpp is HUGE**: ~294MB (mostly models)
-- **GitHub limits**: Repositories should stay under 1GB
-- **Fast cloning**: Small repo downloads quickly
-- **Bandwidth efficient**: Users only download what they need
-
-**🔄 Maintenance Benefits:**
-- **Always latest version**: Setup script downloads fresh copy
-- **No version conflicts**: No need to sync with upstream
-- **Automatic updates**: Gets latest whisper.cpp automatically
-- **Standard practice**: Most projects exclude large dependencies
+## whisper.cpp is an external dependency for voice engine
 
 **✅ How It Works:**
 The setup script automatically handles whisper.cpp:
@@ -109,12 +96,6 @@ if [ ! -d "whisper.cpp" ]; then
     cd ..
 fi
 ```
-
-**Users get whisper.cpp automatically:**
-1. **Clone** repo (fast, small)
-2. **Run** `./setup.sh` 
-3. **Whisper.cpp** downloads and builds
-4. **Everything works** seamlessly
 
 ## 🔧 Development
 
@@ -132,11 +113,14 @@ python3 tests/test_whisper.py
 
 ### Building the App Bundle
 ```bash
+# First, ensure dependencies are installed
+./setup.sh
+
 # Build macOS app bundle
 pyinstaller metaVoice.spec
 
 # Install to Applications
-./install_metaVoice.sh
+sh ./install_metaVoice.sh
 ```
 
 ### Local Development Build Process
@@ -188,9 +172,10 @@ command_patterns = {
 - Try clipboard input method
 
 ### Setup Issues
-- Run `./setup.sh` to install all dependencies
+- **Always run `./setup.sh` first** - This installs all dependencies including whisper.cpp
 - Check that Homebrew is installed
 - Verify Python 3.8+ is installed
+- If setup fails, try: `chmod +x setup.sh && ./setup.sh`
 
 ### Build Issues
 - **Permission denied**: Use `sh ./install_metaVoice.sh` instead of `./install_metaVoice.sh`
@@ -220,24 +205,6 @@ The system recognizes structured commands:
 ### General Automation
 - `"open application [app-name]"`
 - `"search for [query]"`
-
-## 🎉 Success!
-
-When everything is working:
-- ✅ App launches from Applications folder
-- ✅ GUI appears with dark theme
-- ✅ Microphone button responds
-- ✅ Voice recording and transcription works
-- ✅ Text can be sent to target applications
-
-## 📞 Getting Help
-
-- **Installation**: Run `./setup.sh` for automated setup
-- **Usage**: See GUI features section above
-- **Development**: See development section
-- **Issues**: Check troubleshooting section
-
-**Enjoy using metaVoice for faster, voice-powered productivity!** 🚀
 
 ## License
 
