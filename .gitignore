@@ -1,4 +1,5 @@
-
+# Whisper.cpp dependency (large, should be installed separately)
+whisper.cpp/
 
 # Python cache files
 __pycache__/
