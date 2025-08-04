@@ -19,18 +19,12 @@ A modern desktop automation system that uses voice commands to control your comp
 # 1. Clone the repository
 git clone https://github.com/BrianZhang2018/metaVoice.git
 cd metaVoice
-
 # 2. Install dependencies and setup
 ./setup.sh
-
 # 3. Build the app bundle
 pyinstaller metaVoice.spec
-
-# 4. Install to Applications
+# 4. Install to macos Applications
 sh ./install_metaVoice.sh
-
-# 5. Test the installation
-open /Applications/metaVoice.app
 ```
 
 ### Option 2: Development Setup
@@ -38,22 +32,21 @@ open /Applications/metaVoice.app
 # Clone the repository
 git clone https://github.com/BrianZhang2018/metaVoice.git
 cd metaVoice
-
 # Run the setup script
 ./setup.sh
-
-# Run the GUI
+# Run the dashboard GUI
 python3 auto_input_voice_gui.py
+# Run the floatwindow GUI
+python3 floating_recorder.py
 ```
 
 ## 📱 Using metaVoice
 
 ### First Time Setup
-1. **Launch** `metaVoice.app` from Applications
+1. **Launch** `metaVoice.app` from macos Applications
 2. **Grant permissions** for microphone access
 3. **Optional**: Grant accessibility permissions for automation
 4. **Start recording** with the microphone button
-
 
 ## 🏗️ Project Structure
 
@@ -94,41 +87,6 @@ if [ ! -d "whisper.cpp" ]; then
 fi
 ```
 
-## 🔧 Development
-
-### Running from Source
-```bash
-# Run the GUI
-python3 auto_input_voice_gui.py
-
-# Run tests
-python3 tests/test_whisper.py
-```
-
-### Building the App Bundle
-```bash
-# Build macOS app bundle
-pyinstaller metaVoice.spec
-
-# Install to Applications
-sh ./install_metaVoice.sh
-```
-
-### Local Development Build Process
-```bash
-# 1. Build the app bundle
-pyinstaller metaVoice.spec
-
-# 2. Install to Applications (requires sudo for permissions)
-sh ./install_metaVoice.sh
-
-# 3. Test the installation
-open /Applications/metaVoice.app
-
-# 4. Clean up build artifacts (optional)
-rm -rf build/ dist/
-```
-
 **Build Output:**
 - `dist/metaVoice.app` - The macOS application bundle
 - `build/` - PyInstaller build artifacts (can be deleted after build)
@@ -162,26 +120,8 @@ command_patterns = {
 - Check target application selection
 - Try clipboard input method
 
-### Setup Issues
-- **Always run `./setup.sh` first** - This installs all dependencies including whisper.cpp
-- Check that Homebrew is installed
-- Verify Python 3.8+ is installed
-- If setup fails, try: `chmod +x setup.sh && ./setup.sh`
 
-### Build Issues
-- **Permission denied**: Use `sh ./install_metaVoice.sh` instead of `./install_metaVoice.sh`
-- **PyInstaller not found**: Install with `pip3 install pyinstaller`
-- **Build fails**: Clean and rebuild with `rm -rf build/ dist/ && pyinstaller metaVoice.spec`
-- **App won't launch**: Check microphone permissions in System Preferences
-
-## 📊 Performance Tips
-
-- **Real-time Commands**: Use 3-5 second recordings
-- **High Accuracy**: Use 5-10 second recordings in quiet environment
-- **Apple Silicon**: Automatic Metal GPU acceleration
-- **Memory**: 2GB+ free RAM recommended
-
-## 🎯 Supported Commands
+## 🎯 Supported Commands - coming
 
 The system recognizes structured commands:
 
