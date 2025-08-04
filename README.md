@@ -25,10 +25,13 @@ A modern desktop automation system that uses voice commands to control your comp
 ### Option 2: Development Setup
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd desktopAuto
+git clone https://github.com/BrianZhang2018/metaVoice.git
+cd metaVoice
 
-# Install dependencies
+# Run the setup script (recommended)
+./setup.sh
+
+# Or install manually
 pip3 install -r requirements.txt
 
 # Run the GUI
