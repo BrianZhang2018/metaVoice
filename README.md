@@ -139,6 +139,25 @@ pyinstaller metaVoice.spec
 ./install_metaVoice.sh
 ```
 
+### Local Development Build Process
+```bash
+# 1. Build the app bundle
+pyinstaller metaVoice.spec
+
+# 2. Install to Applications (requires sudo for permissions)
+sh ./install_metaVoice.sh
+
+# 3. Test the installation
+open /Applications/metaVoice.app
+
+# 4. Clean up build artifacts (optional)
+rm -rf build/ dist/
+```
+
+**Build Output:**
+- `dist/metaVoice.app` - The macOS application bundle
+- `build/` - PyInstaller build artifacts (can be deleted after build)
+
 ### Adding New Commands
 Modify the `parse_command` method in `whisper_wrapper.py`:
 
@@ -172,6 +191,12 @@ command_patterns = {
 - Run `./setup.sh` to install all dependencies
 - Check that Homebrew is installed
 - Verify Python 3.8+ is installed
+
+### Build Issues
+- **Permission denied**: Use `sh ./install_metaVoice.sh` instead of `./install_metaVoice.sh`
+- **PyInstaller not found**: Install with `pip3 install pyinstaller`
+- **Build fails**: Clean and rebuild with `rm -rf build/ dist/ && pyinstaller metaVoice.spec`
+- **App won't launch**: Check microphone permissions in System Preferences
 
 ## 📊 Performance Tips
 
