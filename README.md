@@ -14,31 +14,62 @@ A modern desktop automation system that uses voice commands to control your comp
 
 ## 🚀 Quick Installation
 
-### Option 1: macOS App installation (for normal user)
+### Option 1: Download Pre-built App (Easiest - No Python Required)
+```bash
+# Download the pre-built metaVoice.app
+# (Coming soon - direct download link)
+
+# Drag and drop to Applications folder
+# Or use the installer script
+```
+
+### Option 2: Build from Source (For Developers)
 ```bash
 # 1. Clone the repository
 git clone https://github.com/BrianZhang2018/metaVoice.git
 cd metaVoice
+
 # 2. Install dependencies and setup
 ./setup.sh
+
 # 3. Build the app bundle
 pyinstaller metaVoice.spec
-# 4. Install to macos Applications
+
+# 4. Install to Applications
 sh ./install_metaVoice.sh
+
+# 5. Test the installation
+open /Applications/metaVoice.app
 ```
 
-### Option 2: Development Setup
+### Option 3: Create Distribution Package (For Sharing)
 ```bash
-# Clone the repository
-git clone https://github.com/BrianZhang2018/metaVoice.git
-cd metaVoice
-# Run the setup script
-./setup.sh
-# Run the dashboard GUI
-python3 auto_input_voice_gui.py
-# Run the floatwindow GUI
-python3 floating_recorder.py
+# After building the app bundle, create a distribution package
+./package_for_distribution.sh
+
+# This creates:
+# - metaVoice-distribution/ (folder with app and installers)
+# - metaVoice-macOS.zip (ready to share with non-developers)
 ```
+
+## 📦 Distribution for Non-Developers
+
+The `package_for_distribution.sh` script creates a complete distribution package that includes:
+
+- **metaVoice.app** - Pre-built application bundle
+- **install.sh** - Automated installer script
+- **Install metaVoice.command** - Drag-and-drop installer
+- **README.txt** - User instructions
+
+Users without Python can simply:
+1. Download the ZIP file
+2. Extract it
+3. Double-click "Install metaVoice.command"
+4. Use the app!
+
+**Build Output:**
+- `dist/metaVoice.app` - The macOS application bundle
+- `build/` - PyInstaller build artifacts (can be deleted after build)
 
 ## 📱 Using metaVoice
 
@@ -75,7 +106,7 @@ metaVoice/
 ## whisper.cpp is an external dependency for voice engine
 
 **✅ How It Works:**
-The setup script automatically handles whisper.cpp:
+The setup script automatically downloads whisper.cpp:
 ```bash
 # In setup.sh - automatically downloads and builds
 if [ ! -d "whisper.cpp" ]; then
@@ -86,10 +117,6 @@ if [ ! -d "whisper.cpp" ]; then
     cd ..
 fi
 ```
-
-**Build Output:**
-- `dist/metaVoice.app` - The macOS application bundle
-- `build/` - PyInstaller build artifacts (can be deleted after build)
 
 ### Adding New Commands
 Modify the `parse_command` method in `whisper_wrapper.py`:
