@@ -37,7 +37,7 @@ def main():
     print("✅ metaVoice started successfully!")
     print("💡 Use the ⚙️ button on the floating recorder to open the dashboard")
     print("💡 Use Cmd+Shift+R to show/hide the floating recorder")
-    print("💡 Use Cmd+Shift+Space to start/stop recording")
+    print("💡 Use Cmd (Command key) to start/stop recording")
     
     # Run floating recorder in main thread (this will show the floating window)
     print("🎤 Starting floating recorder main loop...")

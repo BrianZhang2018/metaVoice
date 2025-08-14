@@ -180,7 +180,7 @@ class FloatingRecorder:
         # Hotkey indicator (small label)
         self.hotkey_label = ctk.CTkLabel(
             main_frame,
-            text="⌨️ Cmd+Shift+Space",
+            text="⌨️ Cmd",
             font=ctk.CTkFont(size=8),
             text_color="#888888"
         )
@@ -198,16 +198,16 @@ class FloatingRecorder:
         self.hotkeys_registered = False
         
         try:
-            # Register Command+Shift+R for showing/hiding window
+            # Register Command key for recording/stopping
+            keyboard.add_hotkey('cmd', self.toggle_recording)
+            print("✅ Recording hotkey registered: Cmd (Command key)")
+            
+            # Register Command+Shift+R for showing/hiding window (keep this for window control)
             keyboard.add_hotkey('cmd+shift+r', self.toggle_visibility)
             print("✅ Window hotkey registered: Cmd+Shift+R")
             
-            # Register Command+Shift+Space for recording/stopping
-            keyboard.add_hotkey('cmd+shift+space', self.toggle_recording)
-            print("✅ Recording hotkey registered: Cmd+Shift+Space")
-            
             self.hotkeys_registered = True
-            self.update_hotkey_label("⌨️ Cmd+Shift+Space")
+            self.update_hotkey_label("⌨️ Cmd")
             
         except Exception as e:
             print(f"❌ Failed to register hotkeys: {e}")
@@ -216,11 +216,11 @@ class FloatingRecorder:
             
             # Fallback: Try alternative hotkey combinations
             try:
+                keyboard.add_hotkey('ctrl', self.toggle_recording)
                 keyboard.add_hotkey('ctrl+shift+r', self.toggle_visibility)
-                keyboard.add_hotkey('ctrl+shift+space', self.toggle_recording)
-                print("✅ Alternative hotkeys registered: Ctrl+Shift+R and Ctrl+Shift+Space")
+                print("✅ Alternative hotkeys registered: Ctrl and Ctrl+Shift+R")
                 self.hotkeys_registered = True
-                self.update_hotkey_label("⌨️ Ctrl+Shift+Space")
+                self.update_hotkey_label("⌨️ Ctrl")
             except Exception as e2:
                 print(f"❌ Alternative hotkeys also failed: {e2}")
                 print("💡 Hotkeys disabled - use the floating window buttons")

@@ -74,10 +74,25 @@ Users without Python can simply:
 ## 📱 Using metaVoice
 
 ### First Time Setup
-1. **Launch** `metaVoice.app` from macos Applications
-2. **Grant permissions** for microphone access
-3. **Optional**: Grant accessibility permissions for automation
-4. **Start recording** with the microphone button
+1. **Launch** `metaVoice.app` from macOS Applications
+2. **Grant permissions** for microphone access when prompted
+3. **Set up text input automation** (required for voice-to-text functionality):
+   ```bash
+   # Run the permission setup script
+   python setup_permissions.py
+   ```
+   This will help you grant the necessary permissions for automatic text input.
+4. **Start recording** with the microphone button in the floating window
+
+### Text Input Automation Setup
+For metaVoice to automatically type your voice input into applications (like Cursor), you need to grant accessibility permissions:
+
+1. **Run the setup script**: `python setup_permissions.py`
+2. **Follow the prompts** to open System Preferences
+3. **Grant permissions** to Python/Terminal in Accessibility settings
+4. **Test the automation** to ensure it's working
+
+**Note**: Without these permissions, voice input will be transcribed but won't be automatically typed into applications.
 
 ## 🏗️ Project Structure
 
