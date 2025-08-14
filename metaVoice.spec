@@ -41,6 +41,8 @@ datas = [
 hiddenimports = [
     'whisper_wrapper',
     'text_input_automation',
+    'floating_recorder',
+    'auto_input_voice_gui',
     'customtkinter',
     'customtkinter.windows.widgets',
     'customtkinter.windows.widgets.core_rendering',
@@ -97,7 +99,7 @@ hiddenimports = [
 ]
 
 a = Analysis(
-    ['auto_input_voice_gui.py'],
+    ['main.py'],
     pathex=[],
     binaries=[],
     datas=datas,

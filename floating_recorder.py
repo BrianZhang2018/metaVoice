@@ -26,7 +26,22 @@ class FloatingRecorder:
         self.root.geometry("300x70")  # Increased height from 60 to 70
         self.root.resizable(False, False)
         self.root.attributes('-topmost', True)
-        self.root.overrideredirect(True)  # Remove window decorations
+        
+        # Try to remove window decorations, but handle potential errors
+        try:
+            self.root.overrideredirect(True)  # Remove window decorations
+        except Exception as e:
+            print(f"⚠️  Could not remove window decorations: {e}")
+            # Fallback: try alternative method
+            try:
+                self.root.attributes('-type', 'dock')  # macOS dock-style window
+            except:
+                pass  # Continue without borderless window
+        
+        # Ensure window is properly initialized and clickable
+        self.root.update_idletasks()
+        self.root.lift()
+        self.root.focus_force()
         
         # Position in top-right corner
         screen_width = self.root.winfo_screenwidth()
