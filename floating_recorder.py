@@ -9,7 +9,7 @@ import customtkinter as ctk
 import threading
 import time
 import queue
-import keyboard
+from pynput import keyboard
 import pyaudio
 import numpy as np
 from whisper_wrapper import WhisperWrapper
@@ -23,9 +23,14 @@ class FloatingRecorder:
     def __init__(self):
         self.root = ctk.CTk()
         self.root.title("metaVoice Recorder")
-        self.root.geometry("300x70")  # Increased height from 60 to 70
+        self.root.geometry("300x100")  # Increased height to accommodate all buttons
         self.root.resizable(False, False)
         self.root.attributes('-topmost', True)
+        # Set maximum window level to stay above all apps
+        try:
+            self.root.call('wm', 'attributes', '.', '-level', 'floating')
+        except:
+            pass
         
         # Try to remove window decorations, but handle potential errors
         try:
@@ -46,7 +51,7 @@ class FloatingRecorder:
         # Position in top-right corner
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        self.root.geometry(f"300x70+{screen_width-320}+20")  # Updated height
+        self.root.geometry(f"300x100+{screen_width-320}+20")  # Updated height
         
         # Initialize components
         self.whisper = WhisperWrapper()
@@ -54,6 +59,9 @@ class FloatingRecorder:
         self.is_recording = False
         self.is_visible = False
         self.should_stop_recording = False  # Flag to stop recording early
+        
+        # Hotkey listener
+        self.hotkey_listener = None
         
         # Audio visualization
         self.audio_levels = [0] * 12
@@ -163,24 +171,22 @@ class FloatingRecorder:
         )
         self.close_button.pack(side="top", pady=3)
         
-        # Settings button - macOS style gray
-        self.settings_button = ctk.CTkButton(
+        # Settings label - clickable text
+        self.settings_label = ctk.CTkLabel(
             right_button_frame,
-            text="⚙️",
-            width=28,
-            height=28,
-            corner_radius=14,
-            fg_color="#28CA42",
-            hover_color="#24B13A",
-            command=self.open_dashboard,
-            font=ctk.CTkFont(size=12)
+            text="SETTINGS",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            text_color="#FF6B35",  # Bright orange text
+            cursor="hand2"  # Hand cursor on hover
         )
-        self.settings_button.pack(side="top", pady=3)
+        self.settings_label.pack(side="top", pady=5)
+        self.settings_label.bind("<Button-1>", lambda e: self.open_dashboard())
+        print(f"✅ Settings label created: {self.settings_label is not None}")
         
         # Hotkey indicator (small label)
         self.hotkey_label = ctk.CTkLabel(
             main_frame,
-            text="⌨️ Cmd",
+            text="⌨️ ⌘+⌥",
             font=ctk.CTkFont(size=8),
             text_color="#888888"
         )
@@ -190,41 +196,46 @@ class FloatingRecorder:
         self.root.bind("<Button-1>", self.start_drag)
         self.root.bind("<B1-Motion>", self.on_drag)
         
-        # Hide window initially
+        # Hide window initially - will only show during recording
         self.root.withdraw()
+        self.is_visible = False
         
     def setup_hotkey(self):
-        """Setup global hotkeys for the floating window"""
+        """Setup global hotkeys for the floating window using pynput"""
         self.hotkeys_registered = False
         
         try:
-            # Register Command key for recording/stopping
-            keyboard.add_hotkey('cmd', self.toggle_recording)
-            print("✅ Recording hotkey registered: Cmd (Command key)")
+            # Define hotkey mappings
+            hotkey_map = {
+                '<cmd>+<alt>': self.toggle_recording,  # Command+Alt for recording
+                '<f2>': self.toggle_visibility,    # F2 for show/hide window
+                '<cmd>+<shift>+d': self.open_dashboard,  # Command+Shift+D for dashboard
+                '<cmd>+<shift>+z': self.open_dashboard,  # Command+Shift+Z for dashboard (alternative)
+            }
             
-            # Register Command+Shift+R for showing/hiding window (keep this for window control)
-            keyboard.add_hotkey('cmd+shift+r', self.toggle_visibility)
-            print("✅ Window hotkey registered: Cmd+Shift+R")
+            # Create and start the global hotkey listener
+            self.hotkey_listener = keyboard.GlobalHotKeys(hotkey_map)
+            self.hotkey_listener.start()
+            
+            print("✅ Recording hotkey registered: Command+Alt")
+            print("✅ Window hotkey registered: F2")
+            print("✅ Dashboard hotkey registered: Command+Shift+D")
+            print("✅ Dashboard hotkey registered: Command+Shift+Z (alternative)")
             
             self.hotkeys_registered = True
-            self.update_hotkey_label("⌨️ Cmd")
+            self.update_hotkey_label("⌨️ ⌘+⌥")
             
         except Exception as e:
             print(f"❌ Failed to register hotkeys: {e}")
-            print("💡 You may need to grant accessibility permissions to your terminal/IDE")
-            print("💡 Alternative: Use the floating window buttons instead")
+            if "accessibility" in str(e).lower():
+                print("💡 Accessibility permissions required for global hotkeys")
+                print("💡 Go to System Preferences → Security & Privacy → Privacy → Accessibility")
+                print("💡 Add your application to the list")
+            else:
+                print("💡 You may need to grant accessibility permissions")
+                print("💡 Alternative: Use the floating window buttons instead")
             
-            # Fallback: Try alternative hotkey combinations
-            try:
-                keyboard.add_hotkey('ctrl', self.toggle_recording)
-                keyboard.add_hotkey('ctrl+shift+r', self.toggle_visibility)
-                print("✅ Alternative hotkeys registered: Ctrl and Ctrl+Shift+R")
-                self.hotkeys_registered = True
-                self.update_hotkey_label("⌨️ Ctrl")
-            except Exception as e2:
-                print(f"❌ Alternative hotkeys also failed: {e2}")
-                print("💡 Hotkeys disabled - use the floating window buttons")
-                self.update_hotkey_label("⌨️ Use buttons")
+            self.update_hotkey_label("⌨️ Use buttons")
     
     def update_hotkey_label(self, text):
         """Update the hotkey indicator label"""
@@ -241,13 +252,24 @@ class FloatingRecorder:
         self.root.after(2000, lambda: self.hotkey_label.configure(text=original_text, text_color="#888888"))
     
     def toggle_visibility(self):
-        """Toggle floating window visibility"""
+        """Toggle floating window visibility (manual override)"""
         if self.is_visible:
             print("👁️ Hotkey: Hiding window...")
             self.hide_window()
         else:
             print("👁️ Hotkey: Showing window...")
             self.show_window()
+            # If not recording, auto-hide after 3 seconds
+            if not self.is_recording:
+                def auto_hide():
+                    time.sleep(3)
+                    if not self.is_recording:  # Double check we're not recording
+                        self.hide_window()
+                        print("⏰ Auto-hiding window after 3 seconds")
+                
+                auto_hide_thread = threading.Thread(target=auto_hide)
+                auto_hide_thread.daemon = True
+                auto_hide_thread.start()
     
     def is_window_minimized(self):
         """Check if window is minimized"""
@@ -277,6 +299,12 @@ class FloatingRecorder:
         self.is_visible = True
         self.root.lift()
         self.root.focus_force()
+        # Ensure maximum priority
+        self.root.attributes('-topmost', True)
+        try:
+            self.root.call('wm', 'attributes', '.', '-level', 'floating')
+        except:
+            pass
     
     def hide_window(self):
         """Hide the floating window"""
@@ -292,7 +320,7 @@ class FloatingRecorder:
         self.hide_window()
         
         # Show a notification about how to restore
-        print("💡 Window hidden! Use Cmd+Shift+R to show it again")
+        print("💡 Window hidden! Use F2 to show it again")
         print("💡 Or run: python floating_recorder.py to restart")
         
         # Try to show a system notification
@@ -300,7 +328,7 @@ class FloatingRecorder:
             import subprocess
             subprocess.run([
                 'osascript', '-e', 
-                'display notification "metaVoice is hidden. Use Cmd+Shift+R to restore." with title "metaVoice"'
+                'display notification "metaVoice is hidden. Use F2 to restore." with title "metaVoice"'
             ])
         except:
             pass
@@ -328,6 +356,14 @@ class FloatingRecorder:
         
         # Stop audio visualization
         self.stop_audio_visualization()
+        
+        # Stop hotkey listener
+        if self.hotkey_listener:
+            try:
+                self.hotkey_listener.stop()
+                print("🔇 Hotkey listener stopped")
+            except:
+                pass
         
         # Clean up restore file
         try:
@@ -415,6 +451,9 @@ class FloatingRecorder:
         self.update_record_button()
         self.start_audio_visualization()
         
+        # Show window during recording
+        self.show_window()
+        
         print("🎤 Starting recording...")
         
         # Start recording in thread
@@ -428,6 +467,10 @@ class FloatingRecorder:
         self.is_recording = False
         self.update_record_button()
         self.stop_audio_visualization()
+        
+        # Hide window after recording
+        self.hide_window()
+        
         print("⏹️ Recording stopped")
     
     def record_audio(self):
@@ -531,15 +574,23 @@ class FloatingRecorder:
     
     def open_dashboard(self):
         """Open the main dashboard window"""
-        print("⚙️ Settings clicked - opening dashboard...")
+        print("⚙️ Hotkey: Opening dashboard...")
         if self.dashboard:
             print("✅ Dashboard found, opening...")
-            self.dashboard.show_window()
-            self.hide_window()
-            print("✅ Dashboard opened, floating recorder hidden")
+            # Schedule dashboard opening on main thread to avoid threading issues
+            self.root.after(0, self._open_dashboard_safe)
+            print("✅ Dashboard opening scheduled")
         else:
             print("⚠️ Dashboard not available - reference not set")
             print("💡 This might be a connection issue between windows")
+    
+    def _open_dashboard_safe(self):
+        """Safely open dashboard on main thread"""
+        try:
+            self.dashboard.show_window()
+            print("✅ Dashboard opened successfully")
+        except Exception as e:
+            print(f"❌ Error opening dashboard: {e}")
     
     def set_dashboard(self, dashboard):
         """Set reference to main dashboard"""

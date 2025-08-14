@@ -96,6 +96,13 @@ hiddenimports = [
     'PIL',
     'PIL.Image',
     'PIL.ImageTk',
+    'pynput',
+    'pynput.keyboard',
+    'pynput.keyboard._base',
+    'pynput.keyboard._darwin',
+    'pyobjc',
+    'pyobjc.ApplicationServices',
+    'pyobjc.Quartz',
 ]
 
 a = Analysis(

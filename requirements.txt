@@ -12,7 +12,7 @@ spacy>=3.0.0
 
 # For GUI automation
 pyautogui>=0.9.53
-keyboard>=0.13.5
+pynput>=1.8.0
 
 # For local AI models (we'll add these later)
 # ollama>=0.1.0

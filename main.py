@@ -30,14 +30,16 @@ def main():
     print("📊 Starting dashboard in hidden mode...")
     dashboard.hide_window()
     
-    # Start floating recorder in visible mode
-    print("🎤 Starting floating recorder in visible mode...")
-    floating_recorder.show_window()
+    # Start floating recorder in hidden mode (will show during recording)
+    print("🎤 Starting floating recorder in hidden mode...")
+    floating_recorder.hide_window()
     
     print("✅ metaVoice started successfully!")
-    print("💡 Use the ⚙️ button on the floating recorder to open the dashboard")
-    print("💡 Use Cmd+Shift+R to show/hide the floating recorder")
-    print("💡 Use Cmd (Command key) to start/stop recording")
+    print("💡 Floating window will appear automatically during recording")
+    print("💡 Use Command+Alt to start/stop recording")
+    print("💡 Use F2 to manually show/hide the floating recorder")
+    print("💡 Use Command+Shift+D to open the dashboard")
+    print("💡 Use Command+Shift+Z to open the dashboard (alternative)")
     
     # Run floating recorder in main thread (this will show the floating window)
     print("🎤 Starting floating recorder main loop...")
