@@ -597,7 +597,7 @@ class MetaVoiceApp:
         self.is_recording = True
         self.record_button.configure(text="⏹️ Stop Recording", fg_color="#ff6666")
         
-        # Get current settings
+        # Get current settings and log them
         self.target_app = self.target_var.get()
         self.input_method = self.method_var.get()
         self.auto_input_enabled = self.auto_var.get()
@@ -709,7 +709,15 @@ class MetaVoiceApp:
     def auto_input_text(self, text):
         """Auto-input text into target application"""
         try:
-            self.log(f"🎯 Auto-inputting text: '{text[:50]}...'")
+            self.log(f"📺 === DASHBOARD AUTO-INPUT DEBUG ===")
+            self.log(f"📝 Text to input: '{text[:50]}...'")
+            self.log(f"🎯 Dashboard target app setting: '{self.target_app}'")
+            self.log(f"⌨️ Dashboard input method: '{self.input_method}'")
+            self.log(f"🤖 Dashboard auto-input enabled: {self.auto_input_enabled}")
+            
+            if not self.auto_input_enabled:
+                self.log("🚫 Auto-input is disabled in dashboard settings")
+                return False
             
             success = self.automation.auto_input_text(
                 text, 
@@ -718,12 +726,15 @@ class MetaVoiceApp:
             )
             
             if success:
-                self.log("✅ Text successfully input!")
+                self.log("✅ Dashboard: Text successfully input!")
             else:
-                self.log("❌ Failed to input text")
+                self.log("❌ Dashboard: Failed to input text")
+                
+            return success
                 
         except Exception as e:
-            self.log(f"❌ Error auto-inputting text: {e}")
+            self.log(f"❌ Dashboard error auto-inputting text: {e}")
+            return False
     
     def test_automation(self):
         """Test the automation system"""

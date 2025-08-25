@@ -325,8 +325,26 @@ class TextInputAutomation:
             
             if result.returncode == 0:
                 app_name = result.stdout.strip()
-                print(f"🎯 Frontmost app: {app_name}")
-                return app_name.lower()
+                app_name_lower = app_name.lower()
+                print(f"📱 Raw frontmost app name: '{app_name}'")
+                print(f"📱 Normalized app name: '{app_name_lower}'")
+                
+                # Additional debug info - get process details
+                try:
+                    detail_script = '''
+                    tell application "System Events"
+                        set frontApp to first application process whose frontmost is true
+                        return {name of frontApp, bundle identifier of frontApp}
+                    end tell
+                    '''
+                    detail_result = subprocess.run(['osascript', '-e', detail_script], 
+                                                 capture_output=True, text=True)
+                    if detail_result.returncode == 0:
+                        print(f"📱 App details: {detail_result.stdout.strip()}")
+                except:
+                    pass  # Details are optional
+                    
+                return app_name_lower
             else:
                 print(f"❌ Error getting frontmost app: {result.stderr}")
                 return "unknown"
@@ -342,7 +360,9 @@ class TextInputAutomation:
         Returns:
             Suggested target app name
         """
+        print("🔍 === AUTO-DETECTION DEBUG INFO ===")
         frontmost = self.get_frontmost_app()
+        print(f"📱 Raw frontmost app detected: '{frontmost}'")
         
         # Map common application names to our target names
         app_mapping = {
@@ -362,12 +382,16 @@ class TextInputAutomation:
             "textedit": "notes"
         }
         
+        print(f"🗺️ Available app mappings: {list(app_mapping.keys())}")
+        
         for app_key, target_name in app_mapping.items():
             if app_key in frontmost:
-                print(f"✅ Auto-detected target: {target_name}")
+                print(f"✅ MATCH FOUND: '{app_key}' in '{frontmost}' → target: '{target_name}'")
+                print(f"🎯 Auto-detected target: {target_name}")
                 return target_name
         
-        print(f"⚠️ Unknown app '{frontmost}', using 'active'")
+        print(f"⚠️ NO MATCH: Unknown app '{frontmost}', using 'active' as fallback")
+        print(f"💡 To add support, add '{frontmost}' to app_mapping dictionary")
         return "active"
     
     def focus_active_app(self) -> bool:
@@ -438,55 +462,82 @@ class TextInputAutomation:
         Returns:
             True if successful, False otherwise
         """
-        print(f"🎯 Auto-inputting text: '{text[:50]}...'")
+        print(f"🎯 === AUTO-INPUT DEBUG INFO ===")
+        print(f"📝 Text to input: '{text[:50]}...'")
+        print(f"🎯 Initial target app setting: '{target_app}'")
+        print(f"⌨️ Input method: '{method}'")
         
         try:
             # Handle auto-detection
             if target_app.lower() == "auto-detect":
+                print("🔍 Running auto-detection...")
+                original_target = target_app
                 target_app = self.auto_detect_target()
-                print(f"🤖 Auto-detected target: {target_app}")
+                print(f"🤖 Auto-detection result: '{original_target}' → '{target_app}'")
+            else:
+                print(f"🎯 Using manually specified target: '{target_app}'")
             
             # Focus on target application
+            print(f"🎯 Attempting to focus on target app: '{target_app}'")
+            
             if target_app.lower() == "cursor":
+                print("📱 Focusing on Cursor...")
                 if not self.focus_cursor():
                     print("⚠️ Could not focus Cursor, trying active app")
                     self.focus_active_app()
             elif target_app.lower() == "qoder":
+                print("📱 Focusing on Qoder...")
                 if not self.focus_qoder():
                     print("⚠️ Could not focus Qoder, trying active app")
                     self.focus_active_app()
             elif target_app.lower() == "active":
+                print("📱 Focusing on currently active app...")
                 self.focus_active_app()
             else:
                 # Focus specific application
+                print(f"📱 Focusing on specific app: '{target_app}'")
                 script = f'''
                 tell application "{target_app}"
                     activate
                 end tell
                 '''
-                subprocess.run(['osascript', '-e', script])
+                result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+                if result.returncode == 0:
+                    print(f"✅ Successfully focused on {target_app}")
+                else:
+                    print(f"❌ Failed to focus on {target_app}: {result.stderr}")
             
             # Wait a moment for app to focus
+            print("⏳ Waiting for app to focus...")
             time.sleep(0.3)  # Increased wait time for Electron apps
             
+            # Verify which app is now focused
+            current_focus = self.get_frontmost_app()
+            print(f"📱 App focus verification: '{current_focus}'")
+            
             # Input the text using specified method
+            print(f"⌨️ Using input method: '{method}'")
             if method.lower() == "clipboard":
+                print("📋 Using clipboard method...")
                 # Copy to clipboard first
                 if not self.copy_to_clipboard(text):
                     print("❌ Failed to copy to clipboard")
                     return False
                 
                 # Wait for clipboard to update
+                print("⏳ Waiting for clipboard to update...")
                 time.sleep(0.2)
                 
                 # Paste with improved method
+                print("📋 Attempting to paste...")
                 return self.paste_with_retry()
                 
             elif method.lower() == "direct":
+                print("⌨️ Using direct keyboard input...")
                 # Direct keyboard input
                 return self._input_text_keyboard(text)
             else:
-                print(f"Unknown input method: {method}")
+                print(f"❌ Unknown input method: {method}")
                 return False
                 
         except Exception as e:

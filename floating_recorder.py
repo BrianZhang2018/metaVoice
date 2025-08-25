@@ -73,6 +73,9 @@ class FloatingRecorder:
         self.input_method = "clipboard"
         self.auto_input_enabled = True
         
+        # Pre-recording target (to avoid Python detection issue)
+        self.pre_recording_target = None
+        
         # Dashboard reference (will be set later)
         self.dashboard = None
         
@@ -447,6 +450,23 @@ class FloatingRecorder:
     
     def start_recording(self):
         """Start recording"""
+        print("🎤 === RECORDING START DEBUG ===")
+        
+        # IMPORTANT: Capture target app BEFORE recording starts
+        # (Before Python becomes the frontmost app)
+        if self.target_app == "auto-detect":
+            print("🔍 Pre-recording auto-detection (before Python takes focus)...")
+            detected_target = self.automation.auto_detect_target()
+            print(f"🎯 Pre-recording detected target: '{detected_target}'")
+            
+            # Store the detected target for use during recording
+            self.pre_recording_target = detected_target
+            print(f"💾 Stored pre-recording target: '{self.pre_recording_target}'")
+        else:
+            # Use manually specified target
+            self.pre_recording_target = self.target_app
+            print(f"🎯 Using manual target: '{self.pre_recording_target}'")
+        
         self.is_recording = True
         self.update_record_button()
         self.start_audio_visualization()
@@ -551,21 +571,36 @@ class FloatingRecorder:
     def auto_input_text(self, text):
         """Auto-input text into target application"""
         try:
-            print(f"🎯 Auto-inputting text: '{text[:50]}...'")
+            print(f"🎤 === FLOATING RECORDER AUTO-INPUT DEBUG ===")
+            print(f"📝 Text to input: '{text[:50]}...'")
+            print(f"🎯 Floating recorder target app: '{self.target_app}'")
+            print(f"⌨️ Floating recorder input method: '{self.input_method}'")
+            print(f"🤖 Floating recorder auto-input enabled: {self.auto_input_enabled}")
+            
+            if not self.auto_input_enabled:
+                print("🚫 Auto-input is disabled in floating recorder settings")
+                return False
+            
+            # Use pre-recording target if available (to avoid Python detection issue)
+            actual_target = getattr(self, 'pre_recording_target', self.target_app)
+            print(f"💾 Using target: '{actual_target}' (pre-recording: {hasattr(self, 'pre_recording_target')})")
             
             success = self.automation.auto_input_text(
                 text, 
-                self.target_app, 
+                actual_target,  # Use pre-recording target
                 self.input_method
             )
             
             if success:
-                print("✅ Text successfully input!")
+                print("✅ Floating recorder: Text successfully input!")
             else:
-                print("❌ Failed to input text")
+                print("❌ Floating recorder: Failed to input text")
+                
+            return success
                 
         except Exception as e:
-            print(f"❌ Error auto-inputting text: {e}")
+            print(f"❌ Floating recorder error auto-inputting text: {e}")
+            return False
     
     def handle_error(self, error_msg):
         """Handle errors"""
