@@ -30,7 +30,7 @@ class MetaVoiceApp:
         self.should_stop_recording = False  # Flag to stop recording early
         
         # Settings
-        self.target_app = "cursor"  # Default target
+        self.target_app = "auto-detect"  # Default to auto-detection
         self.input_method = "clipboard"  # Default method
         self.auto_input_enabled = True
         
@@ -391,8 +391,8 @@ class MetaVoiceApp:
         target_label = ctk.CTkLabel(target_frame, text="Target App:", font=ctk.CTkFont(size=12))
         target_label.pack(side="left", padx=10, pady=5)
         
-        self.target_var = ctk.StringVar(value="cursor")
-        target_options = ["cursor", "active", "safari", "chrome", "terminal", "notes"]
+        self.target_var = ctk.StringVar(value="auto-detect")
+        target_options = ["auto-detect", "cursor", "qoder", "active", "safari", "chrome", "terminal", "notes", "vscode", "pycharm"]
         target_menu = ctk.CTkOptionMenu(target_frame, values=target_options, variable=self.target_var)
         target_menu.pack(side="left", padx=10, pady=5)
         

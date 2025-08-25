@@ -278,7 +278,126 @@ class TextInputAutomation:
             print(f"❌ Error focusing Cursor: {e}")
             return False
     
+    def focus_qoder(self) -> bool:
+        """
+        Focus on Qoder IDE application
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            script = '''
+            tell application "Qoder"
+                activate
+            end tell
+            '''
+            
+            result = subprocess.run(['osascript', '-e', script], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("✅ Focused on Qoder")
+                return True
+            else:
+                print(f"❌ Error focusing Qoder: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error focusing Qoder: {e}")
+            return False
+    
+    def get_frontmost_app(self) -> str:
+        """
+        Get the name of the frontmost (active) application
+        
+        Returns:
+            Name of frontmost application, or 'unknown' if unable to determine
+        """
+        try:
+            script = '''
+            tell application "System Events"
+                name of first application process whose frontmost is true
+            end tell
+            '''
+            
+            result = subprocess.run(['osascript', '-e', script], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                app_name = result.stdout.strip()
+                print(f"🎯 Frontmost app: {app_name}")
+                return app_name.lower()
+            else:
+                print(f"❌ Error getting frontmost app: {result.stderr}")
+                return "unknown"
+                
+        except Exception as e:
+            print(f"❌ Error getting frontmost app: {e}")
+            return "unknown"
+    
+    def auto_detect_target(self) -> str:
+        """
+        Automatically detect the best target application based on frontmost app
+        
+        Returns:
+            Suggested target app name
+        """
+        frontmost = self.get_frontmost_app()
+        
+        # Map common application names to our target names
+        app_mapping = {
+            "cursor": "cursor",
+            "qoder": "qoder", 
+            "qoder ide": "qoder",
+            "electron": "qoder",  # Qoder runs on Electron
+            "visual studio code": "vscode",
+            "code": "vscode",
+            "pycharm": "pycharm",
+            "safari": "safari",
+            "google chrome": "chrome",
+            "chrome": "chrome",
+            "terminal": "terminal",
+            "iterm2": "terminal",
+            "notes": "notes",
+            "textedit": "notes"
+        }
+        
+        for app_key, target_name in app_mapping.items():
+            if app_key in frontmost:
+                print(f"✅ Auto-detected target: {target_name}")
+                return target_name
+        
+        print(f"⚠️ Unknown app '{frontmost}', using 'active'")
+        return "active"
+    
     def focus_active_app(self) -> bool:
+        """
+        Focus on the currently active application (bring to front)
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            script = '''
+            tell application "System Events"
+                set frontApp to first application process whose frontmost is true
+                set frontmost of frontApp to true
+            end tell
+            '''
+            
+            result = subprocess.run(['osascript', '-e', script], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print("✅ Focused on active app")
+                return True
+            else:
+                print(f"❌ Error focusing active app: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error focusing active app: {e}")
+            return False
         """
         Focus on the currently active application
         
@@ -313,7 +432,7 @@ class TextInputAutomation:
         
         Args:
             text: Text to input
-            target_app: Target application ("cursor", "active", or app name)
+            target_app: Target application ("auto-detect", "cursor", "qoder", "active", or app name)
             method: Input method ("clipboard", "direct")
             
         Returns:
@@ -322,10 +441,19 @@ class TextInputAutomation:
         print(f"🎯 Auto-inputting text: '{text[:50]}...'")
         
         try:
+            # Handle auto-detection
+            if target_app.lower() == "auto-detect":
+                target_app = self.auto_detect_target()
+                print(f"🤖 Auto-detected target: {target_app}")
+            
             # Focus on target application
             if target_app.lower() == "cursor":
                 if not self.focus_cursor():
                     print("⚠️ Could not focus Cursor, trying active app")
+                    self.focus_active_app()
+            elif target_app.lower() == "qoder":
+                if not self.focus_qoder():
+                    print("⚠️ Could not focus Qoder, trying active app")
                     self.focus_active_app()
             elif target_app.lower() == "active":
                 self.focus_active_app()
@@ -339,23 +467,75 @@ class TextInputAutomation:
                 subprocess.run(['osascript', '-e', script])
             
             # Wait a moment for app to focus
-            time.sleep(0.5)
+            time.sleep(0.3)  # Increased wait time for Electron apps
             
-            # Input text using specified method
-            if method == "clipboard":
-                # Copy to clipboard then paste
-                if self.copy_to_clipboard(text):
-                    time.sleep(0.1)
-                    return self.paste_from_clipboard()
-                else:
-                    print("❌ Failed to copy to clipboard, trying direct input")
-                    return self.input_text_direct(text)
+            # Input the text using specified method
+            if method.lower() == "clipboard":
+                # Copy to clipboard first
+                if not self.copy_to_clipboard(text):
+                    print("❌ Failed to copy to clipboard")
+                    return False
+                
+                # Wait for clipboard to update
+                time.sleep(0.2)
+                
+                # Paste with improved method
+                return self.paste_with_retry()
+                
+            elif method.lower() == "direct":
+                # Direct keyboard input
+                return self._input_text_keyboard(text)
             else:
-                # Direct input
-                return self.input_text_direct(text)
+                print(f"Unknown input method: {method}")
+                return False
                 
         except Exception as e:
             print(f"❌ Error in auto_input_text: {e}")
+            return False
+            
+    def paste_with_retry(self, retries=3) -> bool:
+        """
+        Paste from clipboard with retry logic for better reliability
+        
+        Args:
+            retries: Number of retry attempts
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        for attempt in range(retries):
+            try:
+                # Method 1: AppleScript paste (most reliable)
+                script = '''
+                tell application "System Events"
+                    keystroke "v" using command down
+                end tell
+                '''
+                
+                result = subprocess.run(['osascript', '-e', script], 
+                                      capture_output=True, text=True)
+                
+                if result.returncode == 0:
+                    print(f"✅ Pasted from clipboard (attempt {attempt + 1})")
+                    return True
+                else:
+                    print(f"⚠️ Paste attempt {attempt + 1} failed: {result.stderr}")
+                    
+            except Exception as e:
+                print(f"⚠️ Paste attempt {attempt + 1} error: {e}")
+            
+            # Wait before retry
+            if attempt < retries - 1:
+                time.sleep(0.5)
+        
+        # If all AppleScript attempts fail, try direct keyboard input
+        try:
+            import pyautogui
+            pyautogui.hotkey('cmd', 'v')
+            print("✅ Pasted using pyautogui fallback")
+            return True
+        except Exception as e:
+            print(f"❌ All paste methods failed: {e}")
             return False
     
     def test_automation(self) -> bool:

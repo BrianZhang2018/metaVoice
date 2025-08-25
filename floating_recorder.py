@@ -69,7 +69,7 @@ class FloatingRecorder:
         self.audio_running = False
         
         # Settings
-        self.target_app = "cursor"
+        self.target_app = "auto-detect"  # Default to auto-detection
         self.input_method = "clipboard"
         self.auto_input_enabled = True
         
