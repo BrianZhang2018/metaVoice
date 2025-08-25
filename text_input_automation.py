@@ -16,6 +16,29 @@ class TextInputAutomation:
         self.clipboard_methods = ["applescript", "pbcopy", "pyautogui"]
         self.input_methods = ["applescript", "pyautogui", "keyboard"]
         
+        # Initialize macOS compatibility
+        self._setup_macos_compatibility()
+        
+    def _setup_macos_compatibility(self):
+        """Setup macOS compatibility for packaged app"""
+        try:
+            import Foundation
+            import AppKit
+            
+            # Ensure proper application context
+            self.app = AppKit.NSApplication.sharedApplication()
+            
+            # Check if we're on the main thread
+            if AppKit.NSThread.isMainThread():
+                print("✅ TextInputAutomation initialized on main thread")
+            else:
+                print("⚠️ TextInputAutomation not on main thread - some operations may fail")
+                
+            self.macos_available = True
+        except Exception as e:
+            print(f"⚠️ macOS compatibility setup failed: {e}")
+            self.macos_available = False
+        
     def copy_to_clipboard(self, text: str, method: str = "applescript") -> bool:
         """
         Copy text to clipboard using various methods

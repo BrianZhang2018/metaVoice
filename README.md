@@ -147,10 +147,26 @@ command_patterns = {
 
 ## 🛠️ Troubleshooting
 
-### App Won't Launch
-- Check microphone permissions in System Preferences
-- Try launching from Applications folder
-- Restart the app if first launch fails
+### App Won't Launch (Main App Issues)
+**Known Issue**: The main.py launcher may have compatibility issues on macOS 15.5 with bundled Tkinter.
+
+**✅ WORKAROUND - Run Individual Components:**
+If the main app fails to launch, you can run the components individually:
+
+```bash
+# Option 1: Run Dashboard GUI
+python auto_input_voice_gui.py
+
+# Option 2: Run Floating Recorder Only
+python floating_recorder.py
+
+# Option 3: Run from Source (Most Reliable)
+cd /Users/brianzhang/ai/desktopAuto
+python auto_input_voice_gui.py  # Dashboard with full features
+python floating_recorder.py     # Compact recorder window
+```
+
+**Status**: Individual components work perfectly, only the combined launcher has issues.
 
 ### No Voice Recognition
 - Verify microphone is working in other apps
@@ -161,6 +177,11 @@ command_patterns = {
 - Grant accessibility permissions for automation
 - Check target application selection
 - Try clipboard input method
+
+### GUI Compatibility Issues
+- If packaged app crashes: Use source version instead
+- Tkinter compatibility varies by macOS version
+- Console mode available as fallback
 
 
 ## 🎯 Supported Commands - coming

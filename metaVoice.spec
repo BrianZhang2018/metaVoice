@@ -155,6 +155,7 @@ coll = COLLECT(
 app = BUNDLE(
     coll,
     name='metaVoice.app',
+    icon='metaVoice.icns',
     info_plist={
         'CFBundleName': 'metaVoice',
         'CFBundleDisplayName': 'metaVoice',
